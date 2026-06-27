@@ -1,0 +1,22 @@
+{
+  "name": "qr-studio-pro",
+  "version": "1.0.0",
+  "description": "An advanced QR Code and Poetry Card design tool.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [
+    "qr-code",
+    "generator",
+    "poetry",
+    "card-designer",
+    "vanilla-js"
+  ],
+  "author": "Antigravity",
+  "license": "MIT",
+  "devDependencies": {
+    "vite": "^5.2.0"
+  }
+}

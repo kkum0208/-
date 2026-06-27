@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Studio Pro (QR 藝境) - 進階二維碼與詩歌卡片設計工具</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Ma+Shan+Zheng&family=Noto+Serif+TC:wght@400;700&family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- Libraries (CDNs) -->
+  <!-- qr-code-styling for customized SVG QR codes -->
+  <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.5.0-rc.0/lib/qr-code-styling.js"></script>
+  <!-- html2canvas to convert DOM to Image -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <!-- html5-qrcode for live scanning -->
+  <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <!-- JSZip for bulk download archiving -->
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+</head>
+<body>
+  <!-- Toast Notification System -->
+  <div id="toast-container"></div>
+
+  <!-- Header Section -->
+  <header class="app-header">
+    <div class="logo-container">
+      <div class="logo-icon-wrap">
+        <i data-lucide="qr-code" class="header-logo-icon"></i>
+      </div>
+      <div>
+        <h1 class="logo-text">QR Studio Pro</h1>
+        <p class="logo-subtext">QR 藝境 - 進階定製與藝術卡片設計</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button id="theme-toggle" class="btn-icon" title="切換深/淺色主題">
+        <i data-lucide="sun" class="icon-sun"></i>
+        <i data-lucide="moon" class="icon-moon"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- App Wrapper -->
+  <main class="app-container">
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar">
+      <ul class="nav-menu">
+        <li class="nav-item active" data-target="qr-designer">
+          <i data-lucide="palette"></i>
+          <span>QR 設計生成</span>
+        </li>
+        <li class="nav-item" data-target="poetry-card">
+          <i data-lucide="file-text"></i>
+          <span>詩歌卡片設計</span>
+        </li>
+        <li class="nav-item" data-target="qr-scanner">
+          <i data-lucide="scan-line"></i>
+          <span>掃描解碼</span>
+        </li>
+        <li class="nav-item" data-target="bulk-generator">
+          <i data-lucide="layers"></i>
+          <span>批量生成</span>
+        </li>
+        <li class="nav-item" data-target="history-presets">
+          <i data-lucide="history"></i>
+          <span>歷史與預設</span>
+        </li>
+      </ul>
+      <div class="sidebar-footer">
+        <p>QR Studio Pro v1.0.0</p>
+      </div>
+    </nav>
+
+    <!-- Main Workspace -->
+    <section class="workspace">
+      <!-- 1. QR DESIGNER PANEL -->
+      <div class="tab-panel active" id="panel-qr-designer">
+        <div class="panel-layout">
+          <!-- Left Configuration Form -->
+          <div class="config-panel card-glass">
+            <h2 class="section-title"><i data-lucide="sliders"></i> 內容與樣式設定</h2>
+            
+            <!-- Sub tabs for input data type -->
+            <div class="data-type-tabs">
+              <button class="type-tab active" data-type="url"><i data-lucide="link"></i> 連結</button>
+              <button class="type-tab" data-type="text"><i data-lucide="type"></i> 文字</button>
+              <button class="type-tab" data-type="wifi"><i data-lucide="wifi"></i> Wi-Fi</button>
+              <button class="type-tab" data-type="vcard"><i data-lucide="contact"></i> 名片</button>
+              <button class="type-tab" data-type="email"><i data-lucide="mail"></i> 郵件</button>
+              <button class="type-tab" data-type="sms"><i data-lucide="message-square"></i> 簡訊</button>
+            </div>
+
+            <!-- Content Inputs Container -->
+            <div class="input-form-container">
+              <!-- URL Form -->
+              <div class="input-form active" id="form-url">
+                <div class="form-group">
+                  <label for="input-url">網頁網址 (URL)</label>
+                  <input type="url" id="input-url" placeholder="https://example.com" value="https://example.com">
+                  <span class="input-hint">請輸入完整的網址，包含 http:// 或 https://</span>
+                </div>
+              </div>
+
+              <!-- Text Form -->
+              <div class="input-form" id="form-text">
+                <div class="form-group">
+                  <label for="input-text">輸入文字 / 詞句</label>
+                  <textarea id="input-text" rows="4" placeholder="請輸入欲轉換為二維碼的文字..."></textarea>
+                  <div class="character-count"><span id="text-char-count">0</span> 字</div>
+                </div>
+              </div>
+
+              <!-- Wi-Fi Form -->
+              <div class="input-form" id="form-wifi">
+                <div class="form-grid">
+                  <div class="form-group col-span-2">
+                    <label for="wifi-ssid">網路名稱 (SSID)</label>
+                    <input type="text" id="wifi-ssid" placeholder="例如：Home_Network">
+                  </div>
+                  <div class="form-group password-group">
+                    <label for="wifi-password">密碼</label>
+                    <div class="input-with-action">
+                      <input type="password" id="wifi-password" placeholder="網路密碼">
+                      <button type="button" id="wifi-toggle-pass" class="input-inner-btn"><i data-lucide="eye"></i></button>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="wifi-encryption">安全性</label>
+                    <select id="wifi-encryption">
+                      <option value="WPA" selected>WPA/WPA2</option>
+                      <option value="WEP">WEP</option>
+                      <option value="nopass">無密碼 (Open)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- vCard Form -->
+              <div class="input-form" id="form-vcard">
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label for="vcard-fn">姓名</label>
+                    <input type="text" id="vcard-fn" placeholder="林大明">
+                  </div>
+                  <div class="form-group">
+                    <label for="vcard-org">公司 / 組織</label>
+                    <input type="text" id="vcard-org" placeholder="創藝工作室">
+                  </div>
+                  <div class="form-group">
+                    <label for="vcard-title">職稱</label>
+                    <input type="text" id="vcard-title" placeholder="設計總監">
+                  </div>
+                  <div class="form-group">
+                    <label for="vcard-tel">電話</label>
+                    <input type="tel" id="vcard-tel" placeholder="+886 912345678">
+                  </div>
+                  <div class="form-group">
+                    <label for="vcard-email">電子郵件</label>
+                    <input type="email" id="vcard-email" placeholder="example@studio.com">
+                  </div>
+                  <div class="form-group">
+                    <label for="vcard-url">網站</label>
+                    <input type="url" id="vcard-url" placeholder="https://studio.com">
+                  </div>
+                  <div class="form-group col-span-2">
+                    <label for="vcard-adr">地址</label>
+                    <input type="text" id="vcard-adr" placeholder="台北市信義區信義路五段7號">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Email Form -->
+              <div class="input-form" id="form-email">
+                <div class="form-group">
+                  <label for="email-to">收件者郵件</label>
+                  <input type="email" id="email-to" placeholder="recipient@example.com">
+                </div>
+                <div class="form-group">
+                  <label for="email-subject">郵件主旨</label>
+                  <input type="text" id="email-subject" placeholder="請輸入郵件主旨">
+                </div>
+                <div class="form-group">
+                  <label for="email-body">郵件內容</label>
+                  <textarea id="email-body" rows="3" placeholder="請輸入郵件內容..."></textarea>
+                </div>
+              </div>
+
+              <!-- SMS Form -->
+              <div class="input-form" id="form-sms">
+                <div class="form-group">
+                  <label for="sms-phone">電話號碼</label>
+                  <input type="tel" id="sms-phone" placeholder="例如：+886912345678">
+                </div>
+                <div class="form-group">
+                  <label for="sms-message">簡訊內容</label>
+                  <textarea id="sms-message" rows="3" placeholder="請輸入簡訊內容..."></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Customization Accordion -->
+            <div class="accordion">
+              <!-- Item 1: Body dots styles -->
+              <div class="accordion-item">
+                <div class="accordion-header">
+                  <span>🎨 二維碼碼點 (Dots) 樣式</span>
+                  <i data-lucide="chevron-down" class="accordion-arrow"></i>
+                </div>
+                <div class="accordion-content">
+                  <div class="form-group">
+                    <label for="qr-dot-type">碼點形狀</label>
+                    <select id="qr-dot-type">
+                      <option value="rounded" selected>Rounded (圓角)</option>
+                      <option value="extra-rounded">Extra-rounded (極圓)</option>
+                      <option value="dots">Dots (圓點)</option>
+                      <option value="classy">Classy (藝術)</option>
+                      <option value="classy-rounded">Classy rounded (藝術圓角)</option>
+                      <option value="square">Square (經典方塊)</option>
+                    </select>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label>顏色類型</label>
+                    <div class="radio-group">
+                      <label class="radio-label">
+                        <input type="radio" name="dot-color-type" value="single" checked> 單色
+                      </label>
+                      <label class="radio-label">
+                        <input type="radio" name="dot-color-type" value="gradient"> 漸層色
+                      </label>
+                    </div>
+                  </div>
+
+                  <!-- Dot single color input -->
+                  <div id="dot-color-single-wrap" class="form-group color-input-group">
+                    <label for="qr-dot-color">碼點顏色</label>
+                    <div class="color-picker-wrapper">
+                      <input type="color" id="qr-dot-color" value="#6366f1">
+                      <input type="text" id="qr-dot-color-text" class="color-hex-text" value="#6366f1">
+                    </div>
+                  </div>
+
+                  <!-- Dot gradient settings -->
+                  <div id="dot-gradient-wrap" class="form-group hidden">
+                    <div class="form-grid-colors">
+                      <div class="form-group no-margin">
+                        <label for="qr-dot-grad-start">起點顏色</label>
+                        <div class="color-picker-wrapper">
+                          <input type="color" id="qr-dot-grad-start" value="#6366f1">
+                          <input type="text" id="qr-dot-grad-start-text" class="color-hex-text" value="#6366f1">
+                        </div>
+                      </div>
+                      <div class="form-group no-margin">
+                        <label for="qr-dot-grad-end">終點顏色</label>
+                        <div class="color-picker-wrapper">
+                          <input type="color" id="qr-dot-grad-end" value="#a855f7">
+                          <input type="text" id="qr-dot-grad-end-text" class="color-hex-text" value="#a855f7">
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group mt-15">
+                      <label for="qr-dot-grad-type">漸層類型</label>
+                      <select id="qr-dot-grad-type">
+                        <option value="linear" selected>線性 (Linear)</option>
+                        <option value="radial">放射狀 (Radial)</option>
+                      </select>
+                    </div>
+                    <div id="dot-grad-angle-wrap" class="form-group">
+                      <label for="qr-dot-grad-angle">漸層角度 (<span id="qr-dot-grad-angle-val">0</span>°)</label>
+                      <input type="range" id="qr-dot-grad-angle" min="0" max="360" value="0">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Item 2: Corner Squares (Eyes) -->
+              <div class="accordion-item">
+                <div class="accordion-header">
+                  <span>🔳 定位角標 (Corners) 樣式</span>
+                  <i data-lucide="chevron-down" class="accordion-arrow"></i>
+                </div>
+                <div class="accordion-content">
+                  <!-- Eye frame shape -->
+                  <div class="form-group">
+                    <label for="qr-corner-type">定位邊框形狀 (Outer Frame)</label>
+                    <select id="qr-corner-type">
+                      <option value="extra-rounded" selected>Extra rounded (大圓角)</option>
+                      <option value="rounded">Rounded (圓角)</option>
+                      <option value="square">Square (方形)</option>
+                      <option value="dot">Dot (圓點)</option>
+                    </select>
+                  </div>
+                  <!-- Eye frame color -->
+                  <div class="form-group color-input-group">
+                    <label for="qr-corner-color">定位邊框顏色</label>
+                    <div class="color-picker-wrapper">
+                      <input type="color" id="qr-corner-color" value="#4f46e5">
+                      <input type="text" id="qr-corner-color-text" class="color-hex-text" value="#4f46e5">
+                    </div>
+                  </div>
+
+                  <hr class="form-divider">
+
+                  <!-- Eye ball shape -->
+                  <div class="form-group">
+                    <label for="qr-corner-dot-type">內部定位點形狀 (Inner Ball)</label>
+                    <select id="qr-corner-dot-type">
+                      <option value="dot" selected>Dot (圓形)</option>
+                      <option value="square">Square (方形)</option>
+                      <option value="extra-rounded">Extra rounded (大圓角)</option>
+                    </select>
+                  </div>
+                  <!-- Eye ball color -->
+                  <div class="form-group color-input-group">
+                    <label for="qr-corner-dot-color">內部定位點顏色</label>
+                    <div class="color-picker-wrapper">
+                      <input type="color" id="qr-corner-dot-color" value="#4f46e5">
+                      <input type="text" id="qr-corner-dot-color-text" class="color-hex-text" value="#4f46e5">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Item 3: Background options -->
+              <div class="accordion-item">
+                <div class="accordion-header">
+                  <span>🖼️ 背景 (Background) 樣式</span>
+                  <i data-lucide="chevron-down" class="accordion-arrow"></i>
+                </div>
+                <div class="accordion-content">
+                  <div class="form-group">
+                    <label for="qr-bg-color">背景顏色</label>
+                    <div class="color-picker-wrapper">
+                      <input type="color" id="qr-bg-color" value="#ffffff">
+                      <input type="text" id="qr-bg-color-text" class="color-hex-text" value="#ffffff">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="qr-bg-opacity">背景透明度 (<span id="qr-bg-opacity-val">100</span>%)</label>
+                    <input type="range" id="qr-bg-opacity" min="0" max="100" value="100">
+                    <span class="input-hint">降低透明度可用於疊加背景或導出透明底 PNG。</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Item 4: Logo Settings -->
+              <div class="accordion-item">
+                <div class="accordion-header">
+                  <span>🛡️ 標誌 (Logo) 與中心圖</span>
+                  <i data-lucide="chevron-down" class="accordion-arrow"></i>
+                </div>
+                <div class="accordion-content">
+                  <!-- Logo preset selector -->
+                  <div class="form-group">
+                    <label>預設常用標誌</label>
+                    <div class="logo-presets">
+                      <button type="button" class="preset-logo-btn" data-logo="none" title="無圖標">無</button>
+                      <button type="button" class="preset-logo-btn" data-logo="link" title="網頁連結"><i data-lucide="link-2"></i></button>
+                      <button type="button" class="preset-logo-btn" data-logo="github" title="GitHub"><i data-lucide="github"></i></button>
+                      <button type="button" class="preset-logo-btn" data-logo="mail" title="電子郵件"><i data-lucide="mail"></i></button>
+                      <button type="button" class="preset-logo-btn" data-logo="phone" title="電話"><i data-lucide="phone"></i></button>
+                      <button type="button" class="preset-logo-btn" data-logo="wifi" title="Wi-Fi"><i data-lucide="wifi"></i></button>
+                    </div>
+                  </div>
+
+                  <!-- Custom logo upload -->
+                  <div class="form-group">
+                    <label>上傳自訂標誌</label>
+                    <div class="file-upload-zone" id="logo-drop-zone">
+                      <i data-lucide="image" class="upload-icon"></i>
+                      <span>點擊或拖曳圖片至此</span>
+                      <input type="file" id="logo-file-input" accept="image/*" class="hidden">
+                    </div>
+                    <div id="logo-preview-filename" class="logo-filename-tag hidden">
+                      <span class="name">logo.png</span>
+                      <button type="button" id="logo-remove-btn" class="btn-text-danger"><i data-lucide="x"></i></button>
+                    </div>
+                  </div>
+
+                  <!-- Logo configurations -->
+                  <div class="form-group">
+                    <label for="qr-logo-size">標誌尺寸 (<span id="qr-logo-size-val">20</span>%)</label>
+                    <input type="range" id="qr-logo-size" min="5" max="35" value="20">
+                  </div>
+
+                  <div class="form-group">
+                    <label for="qr-logo-margin">標誌邊距/邊框 (<span id="qr-logo-margin-val">6</span>px)</label>
+                    <input type="range" id="qr-logo-margin" min="0" max="25" value="6">
+                  </div>
+
+                  <div class="form-group toggle-group">
+                    <label for="qr-logo-clear-bg" class="toggle-label">
+                      <input type="checkbox" id="qr-logo-clear-bg" checked>
+                      <span class="toggle-slider"></span>
+                      清除標誌後方點陣 (防遮擋)
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Item 5: QR Code Advanced options -->
+              <div class="accordion-item">
+                <div class="accordion-header">
+                  <span>⚙️ 進階參數 (糾錯與邊距)</span>
+                  <i data-lucide="chevron-down" class="accordion-arrow"></i>
+                </div>
+                <div class="accordion-content">
+                  <div class="form-group">
+                    <label for="qr-ecc">糾錯等級 (Error Correction Level)</label>
+                    <select id="qr-ecc">
+                      <option value="L">L - 低 (7% 容錯)</option>
+                      <option value="M">M - 中 (15% 容錯)</option>
+                      <option value="Q">Q - 高中 (25% 容錯)</option>
+                      <option value="H" selected>H - 高 (30% 容錯，嵌入標誌推薦)</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="qr-margin">二維碼邊距 (Margin - 像素)</label>
+                    <input type="number" id="qr-margin" min="0" max="100" value="10">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Live Preview Panel -->
+          <div class="preview-panel">
+            <div class="preview-container card-glass">
+              <h3 class="preview-title">即時預設</h3>
+              <div class="qr-canvas-wrapper">
+                <div id="qr-render-target">
+                  <!-- The styled QR canvas generated by JS will be injected here -->
+                </div>
+              </div>
+              
+              <!-- Download & Export Settings -->
+              <div class="export-controls">
+                <div class="form-group">
+                  <label for="export-size">匯出解析度 (<span id="export-size-val">1000</span> x <span id="export-size-val2">1000</span> px)</label>
+                  <input type="range" id="export-size" min="200" max="3000" step="100" value="1000">
+                </div>
+                
+                <div class="export-btn-group">
+                  <button id="btn-download-png" class="btn btn-primary"><i data-lucide="download"></i> 下載 PNG</button>
+                  <button id="btn-download-svg" class="btn btn-secondary"><i data-lucide="file-code"></i> 下載 SVG</button>
+                  <button id="btn-save-preset" class="btn btn-tertiary" title="保存為樣式預設"><i data-lucide="bookmark"></i> 保存預設</button>
+                  <button id="btn-save-history" class="btn btn-tertiary" title="手動存入歷史"><i data-lucide="save"></i> 存入歷史</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. POETRY CARD PANEL -->
+      <div class="tab-panel" id="panel-poetry-card">
+        <div class="panel-layout">
+          <!-- Left configuration for poetry cards -->
+          <div class="config-panel card-glass">
+            <h2 class="section-title"><i data-lucide="pencil-ruler"></i> 詩歌卡片版面設計</h2>
+
+            <!-- Text & Poem Input -->
+            <div class="form-group">
+              <label>選擇示範經典</label>
+              <div class="poetry-samples">
+                <button type="button" class="btn-sample-poem" data-poem="jingyesi">靜夜思 (李白)</button>
+                <button type="button" class="btn-sample-poem" data-poem="shuidiaogetou">水調歌頭 (蘇軾)</button>
+                <button type="button" class="btn-sample-poem" data-poem="frost">Snowy Evening (Robert Frost)</button>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="poem-title">詩名 / 標題</label>
+                <input type="text" id="poem-title" placeholder="例如：靜夜思">
+              </div>
+              <div class="form-group">
+                <label for="poem-author">作者 / 出處</label>
+                <input type="text" id="poem-author" placeholder="例如：李白">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="poem-content">詩詞 / 內文</label>
+              <textarea id="poem-content" rows="6" placeholder="床前明月光，&#10;疑是地上霜。&#10;舉頭望明月，&#10;低頭思故鄉。"></textarea>
+            </div>
+
+            <!-- Card Design Accordion -->
+            <div class="accordion">
+              <!-- Layout selections -->
+              <div class="accordion-item">
+                <div class="accordion-header">
+                  <span>📐 佈局與尺寸 (Layout)</span>
+                  <i data-lucide="chevron-down" class="accordion-arrow"></i>
+                </div>
+                <div class="accordion-content">
+                  <div class="form-group">
+                    <label>卡片比例</label>
+                    <div class="card-ratio-options">
+                      <button type="button" class="ratio-btn active" data-ratio="square" data-aspect="1/1">1:1 正方形 (社交媒體)</button>
+                      <button type="button" class="ratio-btn" data-ratio="portrait" data-aspect="9/16">9:16 直式 (手機桌布/Story)</button>
+                      <button type="button" class="ratio-btn" data-ratio="landscape" data-aspect="16/9">16:9 橫式 (橫幅 banner)</button>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="card-layout-style">排版模式</label>
+                    <select id="card-layout-style">
+                      <option value="vertical-split" selected>左右分割 (左文右圖 / 傳統直書)</option>
+                      <option value="horizontal-split">上下分割 (上文下圖 / 現代橫書)</option>
+                      <option value="polaroid">Polaroid 拍立得風 (極簡大白留白)</option>
+                      <option value="watermark">Watermark 浮水印背景 (文字在二維碼上方)</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group toggle-group">
+                    <label for="card-writing-mode" class="toggle-label">
+                      <input type="checkbox" id="card-writing-mode" checked>
+                      <span class="toggle-slider"></span>
+                      古典直書模式 (由上至下，由右至左)
+                    </label>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="card-qr-size">卡片內二維碼佔比 (<span id="card-qr-size-val">30</span>%)</label>
+                    <input type="range" id="card-qr-size" min="15" max="50" value="30">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Theme & Backgrounds -->
+              <div class="accordion-item">
+                <div class="accordion-header">
+                  <span>🎨 主題藝術背景 (Backgrounds)</span>
+                  <i data-lucide="chevron-down" class="accordion-arrow"></i>
+                </div>
+                <div class="accordion-content">
+                  <div class="form-group">
+                    <label>內建背景風格</label>
+                    <div class="card-bg-presets">
+                      <button type="button" class="bg-preset-btn active" data-bg="ink-wash">水墨意境</button>
+                      <button type="button" class="bg-preset-btn" data-bg="glassmorphic">玻璃微光</button>
+                      <button type="button" class="bg-preset-btn" data-bg="golden-calligraphy">金石古風</button>
+                      <button type="button" class="bg-preset-btn" data-bg="cyber-grid">賽博脈絡</button>
+                      <button type="button" class="bg-preset-btn" data-bg="pastel-aurora">極光柔霧</button>
+                      <button type="button" class="bg-preset-btn" data-bg="minimal-light">極簡暖白</button>
+                      <button type="button" class="bg-preset-btn" data-bg="minimal-dark">曜石暗黑</button>
+                    </div>
+                  </div>
+
+                  <!-- Custom Background Image Upload -->
+                  <div class="form-group">
+                    <label>上傳自訂卡片背景圖</label>
+                    <div class="file-upload-zone" id="card-bg-drop-zone">
+                      <i data-lucide="image" class="upload-icon"></i>
+                      <span>上傳背景圖片</span>
+                      <input type="file" id="card-bg-file-input" accept="image/*" class="hidden">
+                    </div>
+                    <div id="card-bg-preview-filename" class="logo-filename-tag hidden">
+                      <span class="name">background.png</span>
+                      <button type="button" id="card-bg-remove-btn" class="btn-text-danger"><i data-lucide="x"></i></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Fonts & Typography -->
+              <div class="accordion-item">
+                <div class="accordion-header">
+                  <span>✍️ 字體與排版 (Typography)</span>
+                  <i data-lucide="chevron-down" class="accordion-arrow"></i>
+                </div>
+                <div class="accordion-content">
+                  <div class="form-group">
+                    <label for="card-font-family">選用字體</label>
+                    <select id="card-font-family">
+                      <option value="'Noto Serif TC', serif" selected>思源宋體 (Elegant Serif)</option>
+                      <option value="'Ma Shan Zheng', cursive">毛筆書法體 (Ma Shan Zheng Calligraphy)</option>
+                      <option value="'Playfair Display', serif">Playfair Serif (適合英文詩歌)</option>
+                      <option value="'Outfit', sans-serif">Outfit Modern (無襯線現代風)</option>
+                      <option value="system-ui, sans-serif">系統預設 (System UI)</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="card-font-size">內文字型大小 (<span id="card-font-size-val">1.2</span>rem)</label>
+                    <input type="range" id="card-font-size" min="0.8" max="2.5" step="0.1" value="1.2">
+                  </div>
+
+                  <div class="form-group">
+                    <label for="card-letter-spacing">字距 (Letter Spacing: <span id="card-letter-spacing-val">0.1</span>em)</label>
+                    <input type="range" id="card-letter-spacing" min="0" max="0.6" step="0.05" value="0.1">
+                  </div>
+
+                  <div class="form-group">
+                    <label for="card-line-height">行距 (Line Height: <span id="card-line-height-val">1.8</span>)</label>
+                    <input type="range" id="card-line-height" min="1.2" max="2.8" step="0.1" value="1.8">
+                  </div>
+
+                  <div class="form-group">
+                    <label for="card-text-color">文字顏色</label>
+                    <div class="color-picker-wrapper">
+                      <input type="color" id="card-text-color" value="#2d3748">
+                      <input type="text" id="card-text-color-text" class="color-hex-text" value="#2d3748">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Live Preview for poetry cards -->
+          <div class="preview-panel">
+            <div class="preview-container card-glass">
+              <h3 class="preview-title">藝術卡片即時預覽</h3>
+              <div class="card-export-wrapper-container">
+                <!-- This is the container that will be exported via html2canvas -->
+                <div id="poetry-card-render-wrapper" class="aspect-square bg-ink-wash writing-vertical" style="aspect-ratio: 1/1;">
+                  <!-- Dynamic layout inside -->
+                  <div class="poetry-card-text-section">
+                    <h4 class="poetry-card-title">靜夜思</h4>
+                    <p class="poetry-card-author">李白</p>
+                    <div class="poetry-card-body">
+                      <p>床前明月光，</p>
+                      <p>疑是地上霜。</p>
+                      <p>舉頭望明月，</p>
+                      <p>低頭思故鄉。</p>
+                    </div>
+                  </div>
+                  <div class="poetry-card-qr-section">
+                    <div id="poetry-card-qr-placeholder">
+                      <!-- Rendered styled QR code goes here -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card download controls -->
+              <div class="export-controls">
+                <p class="export-info-text"><i data-lucide="info" class="inline-icon"></i> 卡片將以下方設定之超高清解析度繪出並下載</p>
+                <div class="export-btn-group">
+                  <button id="btn-download-card" class="btn btn-primary btn-full-width"><i data-lucide="download"></i> 導出下載藝術卡片 (PNG)</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. QR SCANNER PANEL -->
+      <div class="tab-panel" id="panel-qr-scanner">
+        <div class="scanner-workspace card-glass">
+          <h2 class="section-title"><i data-lucide="scan-face"></i> 二維碼掃描與解碼器</h2>
+          
+          <div class="scanner-grid">
+            <!-- Left Side: Live scanner / Upload area -->
+            <div class="scanner-input-area">
+              <div class="scanner-mode-tabs">
+                <button class="scan-mode-tab active" id="btn-scanner-cam"><i data-lucide="camera"></i> 相機即時掃描</button>
+                <button class="scan-mode-tab" id="btn-scanner-file"><i data-lucide="upload-cloud"></i> 上傳圖片檔案</button>
+              </div>
+
+              <!-- Camera View Finder -->
+              <div class="viewfinder-container active" id="scanner-camera-view">
+                <div id="reader-camera-engine"></div>
+                <div class="scanner-laser-line"></div>
+                <button id="btn-scanner-toggle" class="btn btn-secondary mt-15"><i data-lucide="play"></i> 啟動相機</button>
+              </div>
+
+              <!-- Image File Drag Zone -->
+              <div class="viewfinder-container file-drag-zone" id="scanner-file-view">
+                <i data-lucide="image" class="upload-icon-large"></i>
+                <p>拖曳二維碼圖片至此，或者 <strong>點擊選擇檔案</strong></p>
+                <input type="file" id="scan-file-input" accept="image/*" class="hidden">
+                <span class="file-name-info" id="scan-file-selected-name"></span>
+              </div>
+            </div>
+
+            <!-- Right Side: Scanned Results -->
+            <div class="scanner-results-area card-subglass">
+              <h3 class="panel-subtitle"><i data-lucide="file-check"></i> 解碼結果</h3>
+              
+              <div id="scanner-no-result" class="scanner-status-prompt">
+                <i data-lucide="search" class="pulse-icon"></i>
+                <p>等待掃描或上傳檔案進行解碼...</p>
+              </div>
+
+              <div id="scanner-result-content" class="scanner-decoded-box hidden">
+                <div class="result-header">
+                  <span class="badge" id="scanned-type-badge">TEXT</span>
+                  <span class="timestamp" id="scanned-time">23:14:47</span>
+                </div>
+                
+                <div class="result-body">
+                  <label>解碼內容：</label>
+                  <pre id="scanned-text-value" class="decoded-raw-text">Hello World</pre>
+                </div>
+
+                <div class="result-actions">
+                  <!-- Dynamic actions based on parsed content -->
+                  <a href="#" target="_blank" id="scan-action-url" class="btn btn-primary hidden"><i data-lucide="external-link"></i> 開啟連結</a>
+                  <button id="scan-action-wifi" class="btn btn-primary hidden"><i data-lucide="wifi"></i> 連接 Wi-Fi (顯示密碼)</button>
+                  <button id="scan-action-vcard" class="btn btn-primary hidden"><i data-lucide="user-plus"></i> 匯入名片檔 (.vcf)</button>
+                  <button id="scan-action-copy" class="btn btn-secondary"><i data-lucide="copy"></i> 複製內容</button>
+                </div>
+
+                <!-- Structured details box (Wi-Fi or vCard) -->
+                <div id="scan-structured-details" class="structured-details hidden">
+                  <!-- Injected by Javascript -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. BULK GENERATOR PANEL -->
+      <div class="tab-panel" id="panel-bulk-generator">
+        <div class="bulk-workspace card-glass">
+          <h2 class="section-title"><i data-lucide="layers"></i> 批量二維碼生成器</h2>
+          <p class="section-desc">您可以在下方輸入多筆資料，本工具將以您當前設計的 QR 樣式批量產生二維碼，並封裝成 ZIP 檔案下載。</p>
+
+          <div class="bulk-grid">
+            <!-- Left inputs -->
+            <div class="bulk-inputs">
+              <div class="form-group">
+                <label>選擇輸入來源</label>
+                <div class="radio-group">
+                  <label class="radio-label">
+                    <input type="radio" name="bulk-source" value="textarea" checked> 手動輸入 (每行一筆)
+                  </label>
+                  <label class="radio-label">
+                    <input type="radio" name="bulk-source" value="csv"> 上傳 CSV / TXT 檔案
+                  </label>
+                </div>
+              </div>
+
+              <!-- Bulk Textarea input -->
+              <div class="form-group" id="bulk-textarea-wrap">
+                <label for="bulk-lines-input">批次輸入內容 (一行一個 QR)</label>
+                <textarea id="bulk-lines-input" rows="8" placeholder="https://google.com&#10;https://youtube.com&#10;https://github.com"></textarea>
+                <span class="input-hint">可輸入多行網址或文字，每一行將產生一個二維碼。</span>
+              </div>
+
+              <!-- Bulk CSV upload -->
+              <div class="form-group hidden" id="bulk-csv-wrap">
+                <label>選擇 CSV / TXT 檔案</label>
+                <div class="file-upload-zone" id="bulk-drop-zone">
+                  <i data-lucide="file-text" class="upload-icon"></i>
+                  <span>選擇 CSV 或純文字檔 (每行一筆)</span>
+                  <input type="file" id="bulk-file-input" accept=".csv,.txt" class="hidden">
+                </div>
+                <div id="bulk-file-name-info" class="logo-filename-tag hidden">
+                  <span class="name">data.csv</span>
+                  <button type="button" id="bulk-file-remove-btn" class="btn-text-danger"><i data-lucide="x"></i></button>
+                </div>
+              </div>
+
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="bulk-name-prefix">檔案命名首碼 (Prefix)</label>
+                  <input type="text" id="bulk-name-prefix" value="qrcode_">
+                </div>
+                <div class="form-group">
+                  <label for="bulk-img-format">匯出格式</label>
+                  <select id="bulk-img-format">
+                    <option value="png" selected>PNG 圖片</option>
+                    <option value="svg">SVG 向量圖</option>
+                  </select>
+                </div>
+              </div>
+
+              <button id="btn-bulk-generate" class="btn btn-primary btn-full-width mt-15"><i data-lucide="folder-archive"></i> 開始批量生成並下載 ZIP</button>
+            </div>
+
+            <!-- Right progress / preview -->
+            <div class="bulk-progress-panel card-subglass">
+              <h3 class="panel-subtitle">生成狀態與預覽</h3>
+              
+              <div id="bulk-idle-prompt" class="bulk-status-prompt">
+                <i data-lucide="loader-2" class="idle-icon"></i>
+                <p>配置完成後點擊「開始批量生成」</p>
+              </div>
+
+              <!-- Active progress bar -->
+              <div id="bulk-progress-active" class="progress-container hidden">
+                <div class="progress-info">
+                  <span id="bulk-progress-text">準備生成 0 / 0</span>
+                  <span id="bulk-progress-percentage">0%</span>
+                </div>
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill" id="bulk-progress-bar" style="width: 0%;"></div>
+                </div>
+                <p class="generating-tip">請勿關閉視窗，正在將二維碼渲染並加入壓縮檔...</p>
+              </div>
+
+              <!-- Preview of bulk generation list -->
+              <div id="bulk-preview-list-wrap" class="bulk-preview-wrap hidden">
+                <label>產出預覽 (僅顯示前五筆)：</label>
+                <div id="bulk-preview-thumbs" class="bulk-thumbs-grid">
+                  <!-- Injected by script -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. HISTORY & PRESETS PANEL -->
+      <div class="tab-panel" id="panel-history-presets">
+        <div class="history-presets-container">
+          <!-- Left: My Presets -->
+          <div class="presets-section card-glass">
+            <h2 class="section-title"><i data-lucide="bookmark-check"></i> 我的自訂風格預設</h2>
+            <p class="section-desc">您保存的二維碼配色與樣式，點擊可立即套用於當前編輯器。</p>
+            
+            <div id="presets-empty" class="list-empty-prompt">
+              <i data-lucide="award"></i>
+              <p>尚無儲存的預設風格。可在右側預覽區點擊「保存預設」進行儲存。</p>
+            </div>
+
+            <div id="presets-grid" class="presets-cards-grid">
+              <!-- Injected dynamically -->
+            </div>
+          </div>
+
+          <!-- Right: Local History -->
+          <div class="history-section card-glass">
+            <div class="section-header-row">
+              <h2 class="section-title"><i data-lucide="history"></i> 歷史記錄</h2>
+              <button id="btn-clear-history" class="btn btn-danger-text"><i data-lucide="trash-2"></i> 清空全部</button>
+            </div>
+            <p class="section-desc">本機最近生成的二維碼內容記錄（僅保存在您目前的瀏覽器中）。</p>
+
+            <div id="history-empty" class="list-empty-prompt">
+              <i data-lucide="folder-open"></i>
+              <p>目前沒有歷史生成記錄。</p>
+            </div>
+
+            <div id="history-list" class="history-list-wrapper">
+              <!-- Injected dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Lucide Script Loader -->
+  <script src="https://unpkg.com/lucide@0.400.0/dist/umd/lucide.min.js"></script>
+  <!-- Main Application Logic Script -->
+  <script type="module" src="app.js"></script>
+</body>
+</html>
