@@ -50,65 +50,59 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- Initial Built-in Presets ---
   const DEFAULT_PRESETS = [
     {
-      id: 'preset-classic-dark',
-      name: '曜石靛藍',
+      id: 'preset-classic-light',
+      name: '極簡黑白',
       settings: {
-        dotType: 'rounded',
-        dotColorType: 'gradient',
-        dotGradStart: '#6366f1',
-        dotGradEnd: '#a855f7',
-        dotGradType: 'linear',
-        dotGradAngle: 45,
-        cornerType: 'extra-rounded',
-        cornerColor: '#4f46e5',
-        cornerDotType: 'dot',
-        cornerDotColor: '#6366f1',
-        bgColor: '#08090f',
+        dotType: 'square',
+        dotColorType: 'single',
+        dotColor: '#000000',
+        cornerType: 'square',
+        cornerColor: '#000000',
+        cornerDotType: 'square',
+        cornerDotColor: '#000000',
+        bgColor: '#ffffff',
         bgOpacity: 100,
         logoPreset: 'none',
         logoSize: 20,
         logoMargin: 6,
         logoClearBg: true,
-        ecc: 'H',
+        ecc: 'M',
         margin: 15
       }
     },
     {
-      id: 'preset-cyber-neon',
-      name: '賽博極光',
+      id: 'preset-elegant-slate',
+      name: '優雅冷灰',
       settings: {
-        dotType: 'classy',
-        dotColorType: 'gradient',
-        dotGradStart: '#00ffcc',
-        dotGradEnd: '#d946ef',
-        dotGradType: 'linear',
-        dotGradAngle: 135,
-        cornerType: 'square',
-        cornerColor: '#00ffcc',
-        cornerDotType: 'square',
-        cornerDotColor: '#d946ef',
-        bgColor: '#000000',
+        dotType: 'rounded',
+        dotColorType: 'single',
+        dotColor: '#475569',
+        cornerType: 'rounded',
+        cornerColor: '#475569',
+        cornerDotType: 'dot',
+        cornerDotColor: '#475569',
+        bgColor: '#f8fafc',
         bgOpacity: 100,
         logoPreset: 'none',
-        logoSize: 22,
-        logoMargin: 4,
+        logoSize: 20,
+        logoMargin: 6,
         logoClearBg: true,
-        ecc: 'H',
-        margin: 10
+        ecc: 'Q',
+        margin: 15
       }
     },
     {
-      id: 'preset-ink-traditional',
-      name: '水墨禪風',
+      id: 'preset-muji-warm',
+      name: '無印木褐',
       settings: {
         dotType: 'extra-rounded',
         dotColorType: 'single',
-        dotColor: '#262626',
+        dotColor: '#44403c',
         cornerType: 'extra-rounded',
-        cornerColor: '#171717',
+        cornerColor: '#44403c',
         cornerDotType: 'dot',
-        cornerDotColor: '#262626',
-        bgColor: '#f7f5f0',
+        cornerDotColor: '#44403c',
+        bgColor: '#fafaf9',
         bgOpacity: 100,
         logoPreset: 'none',
         logoSize: 18,
@@ -119,19 +113,17 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     },
     {
-      id: 'preset-luxury-gold',
-      name: '沙金尊爵',
+      id: 'preset-minimal-dark',
+      name: '極簡曜石',
       settings: {
-        dotType: 'classy-rounded',
-        dotColorType: 'gradient',
-        dotGradStart: '#dfba6b',
-        dotGradEnd: '#b8860b',
-        dotGradType: 'radial',
-        cornerType: 'extra-rounded',
-        cornerColor: '#dfba6b',
-        cornerDotType: 'dot',
-        cornerDotColor: '#dfba6b',
-        bgColor: '#171717',
+        dotType: 'square',
+        dotColorType: 'single',
+        dotColor: '#ffffff',
+        cornerType: 'square',
+        cornerColor: '#ffffff',
+        cornerDotType: 'square',
+        cornerDotColor: '#ffffff',
+        bgColor: '#09090b',
         bgOpacity: 100,
         logoPreset: 'none',
         logoSize: 20,
@@ -327,8 +319,16 @@ document.addEventListener('DOMContentLoaded', () => {
       type: "canvas",
       data: "https://example.com",
       dotsOptions: {
-        color: "#6366f1",
-        type: "rounded"
+        color: "#18181b",
+        type: "square"
+      },
+      cornersSquareOptions: {
+        color: "#18181b",
+        type: "square"
+      },
+      cornersDotOptions: {
+        color: "#18181b",
+        type: "square"
       },
       backgroundOptions: {
         color: "#ffffff"
@@ -405,7 +405,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Theme Toggle logic ---
   function initTheme() {
-    const savedTheme = localStorage.getItem('theme') || 'dark';
+    const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
     localStorage.setItem('theme', savedTheme);
   }

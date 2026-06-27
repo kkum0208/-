@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-Hant" data-theme="dark">
+<html lang="zh-Hant" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,8 +20,8 @@
   <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <!-- JSZip for bulk download archiving -->
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-  <script type="module" crossorigin src="./assets/index-BfgDp8pH.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-eQOQzd2i.css">
+  <script type="module" crossorigin src="./assets/index-DeP0jhw6.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-BZAg75fw.css">
 </head>
 <body>
   <!-- Toast Notification System -->
@@ -216,12 +216,12 @@
                   <div class="form-group">
                     <label for="qr-dot-type">碼點形狀</label>
                     <select id="qr-dot-type">
-                      <option value="rounded" selected>Rounded (圓角)</option>
+                      <option value="rounded">Rounded (圓角)</option>
                       <option value="extra-rounded">Extra-rounded (極圓)</option>
                       <option value="dots">Dots (圓點)</option>
                       <option value="classy">Classy (藝術)</option>
                       <option value="classy-rounded">Classy rounded (藝術圓角)</option>
-                      <option value="square">Square (經典方塊)</option>
+                      <option value="square" selected>Square (經典方塊)</option>
                     </select>
                   </div>
                   
@@ -241,8 +241,8 @@
                   <div id="dot-color-single-wrap" class="form-group color-input-group">
                     <label for="qr-dot-color">碼點顏色</label>
                     <div class="color-picker-wrapper">
-                      <input type="color" id="qr-dot-color" value="#6366f1">
-                      <input type="text" id="qr-dot-color-text" class="color-hex-text" value="#6366f1">
+                      <input type="color" id="qr-dot-color" value="#18181b">
+                      <input type="text" id="qr-dot-color-text" class="color-hex-text" value="#18181b">
                     </div>
                   </div>
 
@@ -252,15 +252,15 @@
                       <div class="form-group no-margin">
                         <label for="qr-dot-grad-start">起點顏色</label>
                         <div class="color-picker-wrapper">
-                          <input type="color" id="qr-dot-grad-start" value="#6366f1">
-                          <input type="text" id="qr-dot-grad-start-text" class="color-hex-text" value="#6366f1">
+                          <input type="color" id="qr-dot-grad-start" value="#18181b">
+                          <input type="text" id="qr-dot-grad-start-text" class="color-hex-text" value="#18181b">
                         </div>
                       </div>
                       <div class="form-group no-margin">
                         <label for="qr-dot-grad-end">終點顏色</label>
                         <div class="color-picker-wrapper">
-                          <input type="color" id="qr-dot-grad-end" value="#a855f7">
-                          <input type="text" id="qr-dot-grad-end-text" class="color-hex-text" value="#a855f7">
+                          <input type="color" id="qr-dot-grad-end" value="#27272a">
+                          <input type="text" id="qr-dot-grad-end-text" class="color-hex-text" value="#27272a">
                         </div>
                       </div>
                     </div>
@@ -290,9 +290,9 @@
                   <div class="form-group">
                     <label for="qr-corner-type">定位邊框形狀 (Outer Frame)</label>
                     <select id="qr-corner-type">
-                      <option value="extra-rounded" selected>Extra rounded (大圓角)</option>
+                      <option value="extra-rounded">Extra rounded (大圓角)</option>
                       <option value="rounded">Rounded (圓角)</option>
-                      <option value="square">Square (方形)</option>
+                      <option value="square" selected>Square (方形)</option>
                       <option value="dot">Dot (圓點)</option>
                     </select>
                   </div>
@@ -300,8 +300,8 @@
                   <div class="form-group color-input-group">
                     <label for="qr-corner-color">定位邊框顏色</label>
                     <div class="color-picker-wrapper">
-                      <input type="color" id="qr-corner-color" value="#4f46e5">
-                      <input type="text" id="qr-corner-color-text" class="color-hex-text" value="#4f46e5">
+                      <input type="color" id="qr-corner-color" value="#18181b">
+                      <input type="text" id="qr-corner-color-text" class="color-hex-text" value="#18181b">
                     </div>
                   </div>
 
@@ -311,8 +311,8 @@
                   <div class="form-group">
                     <label for="qr-corner-dot-type">內部定位點形狀 (Inner Ball)</label>
                     <select id="qr-corner-dot-type">
-                      <option value="dot" selected>Dot (圓形)</option>
-                      <option value="square">Square (方形)</option>
+                      <option value="dot">Dot (圓形)</option>
+                      <option value="square" selected>Square (方形)</option>
                       <option value="extra-rounded">Extra rounded (大圓角)</option>
                     </select>
                   </div>
@@ -320,8 +320,8 @@
                   <div class="form-group color-input-group">
                     <label for="qr-corner-dot-color">內部定位點顏色</label>
                     <div class="color-picker-wrapper">
-                      <input type="color" id="qr-corner-dot-color" value="#4f46e5">
-                      <input type="text" id="qr-corner-dot-color-text" class="color-hex-text" value="#4f46e5">
+                      <input type="color" id="qr-corner-dot-color" value="#18181b">
+                      <input type="text" id="qr-corner-dot-color-text" class="color-hex-text" value="#18181b">
                     </div>
                   </div>
                 </div>
@@ -607,8 +607,8 @@
                   <div class="form-group">
                     <label for="card-text-color">文字顏色</label>
                     <div class="color-picker-wrapper">
-                      <input type="color" id="card-text-color" value="#2d3748">
-                      <input type="text" id="card-text-color-text" class="color-hex-text" value="#2d3748">
+                      <input type="color" id="card-text-color" value="#18181b">
+                      <input type="text" id="card-text-color-text" class="color-hex-text" value="#18181b">
                     </div>
                   </div>
                 </div>
