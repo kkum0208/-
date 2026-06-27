@@ -1799,3 +1799,41 @@ input[type="range"]::-webkit-slider-thumb:active {
     padding: 16px 20px;
   }
 }
+
+/* Footer styling */
+.workspace-footer {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+.footer-link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: var(--transition-fast);
+}
+.footer-link:hover {
+  color: var(--text-primary);
+}
+.inline-icon {
+  width: 14px;
+  height: 14px;
+}
+
+@media (max-width: 768px) {
+  .sidebar-footer {
+    display: none;
+  }
+  .workspace-footer {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+}
