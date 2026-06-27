@@ -29,6 +29,7 @@ function initializeApp() {
     qrCodeInstance: null,
     customLogoDataUrl: null, // Uploaded logo file
     cardBgDataUrl: null,      // Uploaded card background file
+    selectedScanFile: null,   // Selected QR code image for scanner decoding
     history: [],
     presets: []
   };
@@ -277,13 +278,12 @@ function initializeApp() {
     btnDownloadCard: document.getElementById('btn-download-card'),
     
     // Scanner
-    btnScannerCam: document.getElementById('btn-scanner-cam'),
-    btnScannerFile: document.getElementById('btn-scanner-file'),
-    scannerCameraView: document.getElementById('scanner-camera-view'),
     scannerFileView: document.getElementById('scanner-file-view'),
-    btnScannerToggle: document.getElementById('btn-scanner-toggle'),
     scanFileInput: document.getElementById('scan-file-input'),
     scanFileSelectedName: document.getElementById('scan-file-selected-name'),
+    scannerFilePreviewWrap: document.getElementById('scanner-file-preview-wrap'),
+    scannerFilePreviewImg: document.getElementById('scanner-file-preview-img'),
+    btnConfirmDecode: document.getElementById('btn-confirm-decode'),
     scannerNoResult: document.getElementById('scanner-no-result'),
     scannerResultContent: document.getElementById('scanner-result-content'),
     scannedTypeBadge: document.getElementById('scanned-type-badge'),
@@ -327,7 +327,6 @@ function initializeApp() {
   let selectedLogoPreset = 'none';
   let activeCardRatio = 'square';
   let activeCardBgPreset = 'ink-wash';
-  let cameraScannerInstance = null;
 
   // --- Initializing Libraries & Services ---
   
@@ -443,11 +442,6 @@ function initializeApp() {
     item.addEventListener('click', () => {
       const target = item.getAttribute('data-target');
       
-      // Stop scanner FIRST while the container is still active and visible in the DOM
-      if (state.activeTab === 'qr-scanner' && target !== 'qr-scanner') {
-        stopCameraScanner();
-      }
-
       // Update UI active state
       el.navItems.forEach(i => i.classList.remove('active'));
       item.classList.add('active');
@@ -982,7 +976,7 @@ function initializeApp() {
     const contentLines = el.poemContent.value.split('\n').filter(line => line.trim() !== '');
     
     el.cardTitleText.textContent = titleVal;
-    el.cardAuthorText.textContent = authorVal ? `[${authorVal}]` : '';
+    el.cardAuthorText.innerHTML = authorVal ? `[ ${authorVal} ] <span class="poetry-card-seal-inline">印</span>` : '';
     
     // Clear and rebuild body
     el.cardBodyContent.innerHTML = '';
@@ -1123,98 +1117,18 @@ function initializeApp() {
     });
   });
 
-  // --- QR Code Scanner / Decoder ---
-  let html5QrcodeScanner = null;
-
-  // Tabs within scanning panel
-  el.btnScannerCam.addEventListener('click', () => {
-    el.btnScannerCam.classList.add('active');
-    el.btnScannerFile.classList.remove('active');
-    el.scannerCameraView.classList.add('active');
-    el.scannerFileView.classList.remove('active');
-    
-    // Clear state
-    resetScannerResults();
+  // --- QR Code Scanner / Decoder (File Upload & Manual Decode) ---
+  
+  // File Uploader selector click
+  el.scannerFileView.addEventListener('click', (e) => {
+    if (e.target.closest('#btn-confirm-decode')) return;
+    el.scanFileInput.click();
   });
 
-  el.btnScannerFile.addEventListener('click', () => {
-    el.btnScannerCam.classList.remove('active');
-    el.btnScannerFile.classList.add('active');
-    el.scannerCameraView.classList.remove('active');
-    el.scannerFileView.classList.add('active');
-    
-    stopCameraScanner();
-    resetScannerResults();
-  });
-
-  // Camera scanner control
-  el.btnScannerToggle.addEventListener('click', () => {
-    if (cameraScannerInstance) {
-      stopCameraScanner();
-    } else {
-      startCameraScanner();
-    }
-  });
-
-  function startCameraScanner() {
-    el.scannerCameraView.classList.add('scanning');
-    el.btnScannerToggle.innerHTML = '<i data-lucide="square"></i> 停止相機';
-    lucide.createIcons();
-    resetScannerResults();
-
-    cameraScannerInstance = new Html5Qrcode("reader-camera-engine");
-    cameraScannerInstance.start(
-      { facingMode: "environment" },
-      {
-        fps: 15,
-        qrbox: (width, height) => {
-          const size = Math.min(width, height) * 0.7;
-          return { width: size, height: size };
-        }
-      },
-      (decodedText, decodedResult) => {
-        // Success callback
-        processScanResult(decodedText);
-        stopCameraScanner();
-        showToast('掃描解碼成功！');
-      },
-      (errorMessage) => {
-        // Silent error logs (searching)
-      }
-    ).catch(err => {
-      console.error(err);
-      showToast('無法存取相機，請檢查瀏覽器權限。', 'error');
-      stopCameraScanner();
-    });
-  }
-
-  function stopCameraScanner() {
-    el.scannerCameraView.classList.remove('scanning');
-    el.btnScannerToggle.innerHTML = '<i data-lucide="play"></i> 啟動相機';
-    lucide.createIcons();
-
-    if (cameraScannerInstance) {
-      try {
-        // Only stop if actively scanning to prevent exceptions
-        cameraScannerInstance.stop().then(() => {
-          cameraScannerInstance = null;
-        }).catch(err => {
-          console.error('Error stopping camera:', err);
-          cameraScannerInstance = null;
-        });
-      } catch (e) {
-        console.error('Exception stopping camera:', e);
-        cameraScannerInstance = null;
-      }
-    }
-  }
-
-  // File Uploader decoder
-  el.scannerFileView.addEventListener('click', () => el.scanFileInput.click());
   el.scanFileInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (file) {
-      decodeFile(file);
+      handleFileSelected(file);
     }
   });
 
@@ -1230,12 +1144,40 @@ function initializeApp() {
     el.scannerFileView.classList.remove('dragover');
     const file = e.dataTransfer.files[0];
     if (file && file.type.startsWith('image/')) {
-      decodeFile(file);
+      handleFileSelected(file);
     }
   });
 
-  function decodeFile(file) {
+  function handleFileSelected(file) {
+    state.selectedScanFile = file;
     el.scanFileSelectedName.textContent = `已選擇：${file.name}`;
+    
+    // Display preview image
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      el.scannerFilePreviewImg.src = event.target.result;
+      el.scannerFilePreviewWrap.classList.remove('hidden');
+    };
+    reader.readAsDataURL(file);
+
+    // Show Confirm Decode button
+    el.btnConfirmDecode.classList.remove('hidden');
+    resetScannerResults();
+  }
+
+  // Click handler for confirm button
+  el.btnConfirmDecode.addEventListener('click', (e) => {
+    e.stopPropagation(); // Avoid triggering file chooser dialog
+    if (!state.selectedScanFile) {
+      showToast('請先選擇二維碼圖片檔案！', 'error');
+      return;
+    }
+    decodeFile(state.selectedScanFile);
+  });
+
+  function decodeFile(file) {
+    el.btnConfirmDecode.disabled = true;
+    el.btnConfirmDecode.innerHTML = '正在進行解碼...';
     resetScannerResults();
 
     const fileScanner = new Html5Qrcode("reader-camera-engine");
@@ -1243,10 +1185,16 @@ function initializeApp() {
       .then(decodedText => {
         processScanResult(decodedText);
         showToast('檔案解碼成功！');
+        el.btnConfirmDecode.disabled = false;
+        el.btnConfirmDecode.innerHTML = '<i data-lucide="scan-line"></i> 確認解碼 (Confirm Decode)';
+        lucide.createIcons();
       })
       .catch(err => {
         console.error(err);
-        showToast('無法在圖片中找到二維碼！', 'error');
+        showToast('解碼失敗：無法在該圖片中找到二維碼！', 'error');
+        el.btnConfirmDecode.disabled = false;
+        el.btnConfirmDecode.innerHTML = '<i data-lucide="scan-line"></i> 確認解碼 (Confirm Decode)';
+        lucide.createIcons();
       });
   }
 

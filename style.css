@@ -1099,59 +1099,92 @@ input[type="range"]::-webkit-slider-thumb:active {
 }
 
 /* Card Background Art Templates */
-/* Ink Wash (水墨) */
+/* Ink Wash (水墨意境) */
 .bg-ink-wash {
-  background: #f7f5f0 radial-gradient(circle at 10% 20%, rgba(20, 20, 20, 0.05) 0%, transparent 60%),
-              radial-gradient(circle at 90% 80%, rgba(0, 0, 0, 0.03) 0%, transparent 40%);
-  border: 1px solid rgba(0,0,0,0.05);
+  background-color: #faf6ee;
+  background-image: 
+    radial-gradient(circle at 85% 15%, rgba(0, 0, 0, 0.05) 0%, transparent 60%),
+    radial-gradient(circle at 15% 85%, rgba(0, 0, 0, 0.04) 0%, transparent 50%),
+    linear-gradient(rgba(185, 28, 28, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(185, 28, 28, 0.015) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 16px 16px, 16px 16px; /* Subtle traditional guide grid */
+  border: 1px solid #d4cfc5;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(27, 25, 22, 0.08);
 }
-/* Beautiful decorative ink-dots */
 .bg-ink-wash::before {
   content: "";
   position: absolute;
-  width: 120px;
-  height: 100px;
-  background: radial-gradient(circle, rgba(0,0,0,0.06) 0%, transparent 70%);
-  top: -20px;
-  right: -20px;
-  border-radius: 50%;
-  filter: blur(15px);
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  pointer-events: none;
 }
 .bg-ink-wash::after {
   content: "";
   position: absolute;
-  width: 160px;
-  height: 140px;
-  background: radial-gradient(circle, rgba(0,0,0,0.04) 0%, transparent 75%);
-  bottom: -30px;
-  left: -20px;
-  border-radius: 50%;
-  filter: blur(20px);
+  top: 15px;
+  left: 15px;
+  right: 15px;
+  bottom: 15px;
+  border: 1px solid rgba(0, 0, 0, 0.02);
+  pointer-events: none;
 }
 
-/* Glassmorphic */
+/* Glassmorphic (玻璃微光) */
 .bg-glassmorphic {
-  background: linear-gradient(135deg, #a5b4fc 0%, #c084fc 50%, #f472b6 100%);
+  background: linear-gradient(135deg, #e0e7ff 0%, #fae8ff 50%, #ffe4e6 100%);
   position: relative;
 }
 .bg-glassmorphic::after {
   content: "";
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(255, 255, 255, 0.35);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  top: 15px; left: 15px; right: 15px; bottom: 15px;
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  border-radius: var(--radius-sm);
   z-index: 0;
 }
 .bg-glassmorphic > * {
   z-index: 1;
 }
 
-/* Golden Calligraphy */
+/* Golden Calligraphy (金石古風) */
 .bg-golden-calligraphy {
-  background-color: #1a1a1a;
-  background-image: radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.08) 0%, transparent 80%);
-  border: 1px solid rgba(212, 175, 55, 0.2);
+  background-color: #121214;
+  background-image: 
+    radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.12) 0%, transparent 80%),
+    radial-gradient(2px 2px at 40px 60px, rgba(223, 186, 107, 0.8) 50%, transparent),
+    radial-gradient(1.5px 1.5px at 150px 120px, rgba(223, 186, 107, 0.6) 50%, transparent),
+    radial-gradient(2.5px 2.5px at 310px 240px, rgba(223, 186, 107, 0.9) 50%, transparent),
+    radial-gradient(2px 2px at 80px 420px, rgba(223, 186, 107, 0.7) 50%, transparent);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  position: relative;
+}
+.bg-golden-calligraphy::before {
+  content: "";
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  pointer-events: none;
+}
+.bg-golden-calligraphy::after {
+  content: "";
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  border: 1px dashed rgba(212, 175, 55, 0.15);
+  pointer-events: none;
 }
 .bg-golden-calligraphy .poetry-card-title,
 .bg-golden-calligraphy .poetry-card-body,
@@ -1159,43 +1192,84 @@ input[type="range"]::-webkit-slider-thumb:active {
   color: #dfba6b !important;
 }
 
-/* Cyber Grid */
+/* Cyber Grid (賽博脈絡) */
 .bg-cyber-grid {
-  background-color: #0b0c10;
-  background-image: linear-gradient(rgba(31, 23, 56, 0.5) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(31, 23, 56, 0.5) 1px, transparent 1px);
-  background-size: 20px 20px;
-  border: 2px solid #00ffcc;
-  box-shadow: 0 0 15px rgba(0, 255, 204, 0.2);
+  background-color: #090a0f;
+  background-image: 
+    linear-gradient(rgba(244, 63, 94, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(6, 182, 212, 0.05) 1px, transparent 1px);
+  background-size: 24px 24px;
+  border: 1.5px solid var(--accent-primary);
+  box-shadow: 0 0 20px rgba(9, 9, 11, 0.3);
 }
 .bg-cyber-grid .poetry-card-title,
 .bg-cyber-grid .poetry-card-body,
 .bg-cyber-grid .poetry-card-author {
-  color: #00ffcc !important;
-  text-shadow: 0 0 5px rgba(0, 255, 204, 0.5);
+  color: var(--text-primary) !important;
 }
 
-/* Pastel Aurora */
+/* Pastel Aurora (極光柔霧) */
 .bg-pastel-aurora {
-  background: linear-gradient(120deg, #fad0c4 0%, #ffd1ff 100%);
+  background: linear-gradient(135deg, #ffe5ec 0%, #fff0f5 50%, #e0f2fe 100%);
+  border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
-/* Minimal Light */
+/* Minimal Light (極簡暖白) */
 .bg-minimal-light {
   background-color: #fafaf9;
   border: 1px solid #e7e5e4;
   color: #1c1917;
+  position: relative;
+}
+.bg-minimal-light::before {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  border: 1px solid #e7e5e4;
+  pointer-events: none;
 }
 
-/* Minimal Dark */
+/* Minimal Dark (曜石暗黑) */
 .bg-minimal-dark {
-  background-color: #18181b;
+  background-color: #09090b;
   border: 1px solid #27272a;
 }
 .bg-minimal-dark .poetry-card-title,
 .bg-minimal-dark .poetry-card-body,
 .bg-minimal-dark .poetry-card-author {
   color: #f4f4f5 !important;
+}
+
+/* Traditional Red Wax Seal / Stamp style */
+.poetry-card-seal-inline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid #e11d48;
+  color: #e11d48;
+  background-color: transparent;
+  font-family: 'Ma Shan Zheng', cursive, 'Noto Serif TC', serif;
+  font-weight: 900;
+  font-size: 0.65rem;
+  line-height: 1;
+  margin-left: 6px;
+  margin-top: 2px;
+  border-radius: 1px;
+  transform: rotate(-4deg);
+  box-shadow: 0 0 1px rgba(225, 29, 72, 0.4);
+  vertical-align: middle;
+  padding: 1px;
+  box-sizing: border-box;
+  user-select: none;
+}
+#poetry-card-render-wrapper.writing-vertical .poetry-card-seal-inline {
+  margin-left: 0;
+  margin-top: 6px;
 }
 
 /* --- QR Scanner Layouts --- */

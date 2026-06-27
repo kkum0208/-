@@ -20,8 +20,8 @@
   <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <!-- JSZip for bulk download archiving -->
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-  <script type="module" crossorigin src="./assets/index-C92dJ0NK.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-BoT_marl.css">
+  <script type="module" crossorigin src="./assets/index-BfVsgJ9A.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-CClW4Ke3.css">
 </head>
 <body>
   <!-- Toast Notification System -->
@@ -669,25 +669,27 @@
           <div class="scanner-grid">
             <!-- Left Side: Live scanner / Upload area -->
             <div class="scanner-input-area">
-              <div class="scanner-mode-tabs">
-                <button class="scan-mode-tab active" id="btn-scanner-cam"><i data-lucide="camera"></i> 相機即時掃描</button>
-                <button class="scan-mode-tab" id="btn-scanner-file"><i data-lucide="upload-cloud"></i> 上傳圖片檔案</button>
-              </div>
+              <!-- Hidden camera engine container required by Html5Qrcode library for canvas processing -->
+              <div id="reader-camera-engine" class="hidden" style="display: none;"></div>
 
-              <!-- Camera View Finder -->
-              <div class="viewfinder-container active" id="scanner-camera-view">
-                <div id="reader-camera-engine"></div>
-                <div class="scanner-laser-line"></div>
-                <button id="btn-scanner-toggle" class="btn btn-secondary mt-15"><i data-lucide="play"></i> 啟動相機</button>
-              </div>
-
-              <!-- Image File Drag Zone -->
-              <div class="viewfinder-container file-drag-zone" id="scanner-file-view">
+              <!-- Image File Drag Zone (Always active) -->
+              <div class="viewfinder-container file-drag-zone active" id="scanner-file-view" style="width: 100%; min-height: 220px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
                 <i data-lucide="image" class="upload-icon-large"></i>
                 <p>拖曳二維碼圖片至此，或者 <strong>點擊選擇檔案</strong></p>
                 <input type="file" id="scan-file-input" accept="image/*" class="hidden">
-                <span class="file-name-info" id="scan-file-selected-name"></span>
+                
+                <!-- File Image Preview -->
+                <div id="scanner-file-preview-wrap" class="hidden" style="margin-top: 15px; text-align: center;">
+                  <img id="scanner-file-preview-img" src="" alt="QR Preview" style="max-height: 120px; max-width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border-color); display: inline-block;">
+                </div>
+                
+                <span class="file-name-info" id="scan-file-selected-name" style="margin-top: 10px; font-weight: 500; font-size: 0.85rem;"></span>
               </div>
+
+              <!-- Confirm Decode Action Button -->
+              <button id="btn-confirm-decode" class="btn btn-primary btn-full-width mt-15 hidden">
+                <i data-lucide="scan-line"></i> 確認解碼 (Confirm Decode)
+              </button>
             </div>
 
             <!-- Right Side: Scanned Results -->
