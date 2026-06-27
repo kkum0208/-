@@ -166,6 +166,7 @@ function initializeApp() {
     inputForms: document.querySelectorAll('.input-form'),
     inputUrl: document.getElementById('input-url'),
     inputText: document.getElementById('input-text'),
+    btnGenerateQr: document.getElementById('btn-generate-qr'),
     textCharCount: document.getElementById('text-char-count'),
     wifiSsid: document.getElementById('wifi-ssid'),
     wifiPassword: document.getElementById('wifi-password'),
@@ -442,16 +443,16 @@ function initializeApp() {
     item.addEventListener('click', () => {
       const target = item.getAttribute('data-target');
       
+      // Stop scanner FIRST while the container is still active and visible in the DOM
+      if (state.activeTab === 'qr-scanner' && target !== 'qr-scanner') {
+        stopCameraScanner();
+      }
+
       // Update UI active state
       el.navItems.forEach(i => i.classList.remove('active'));
       item.classList.add('active');
       
       el.tabPanels.forEach(p => p.classList.remove('active'));
-      
-      // Stop scanner if leaving the scanner tab
-      if (state.activeTab === 'qr-scanner' && target !== 'qr-scanner') {
-        stopCameraScanner();
-      }
 
       state.activeTab = target;
       
@@ -708,6 +709,33 @@ function initializeApp() {
   qrEventTriggers.forEach(element => {
     element.addEventListener('input', updateQR);
     element.addEventListener('change', updateQR);
+  });
+
+  // Explicit action button generation trigger
+  if (el.btnGenerateQr) {
+    el.btnGenerateQr.addEventListener('click', () => {
+      updateQR();
+      showToast('二維碼已更新！');
+    });
+  }
+
+  // Keypress Enter listener for single-line inputs to trigger convert
+  const textInputSelectors = [
+    el.inputUrl, el.inputText, el.wifiSsid, el.wifiPassword,
+    el.vcardFn, el.vcardOrg, el.vcardTitle, el.vcardTel, el.vcardEmail, el.vcardUrl, el.vcardAdr,
+    el.emailTo, el.emailSubject, el.emailBody, el.smsPhone, el.smsMessage
+  ];
+  textInputSelectors.forEach(element => {
+    if (element) {
+      element.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          if (element.tagName === 'TEXTAREA') return;
+          e.preventDefault();
+          updateQR();
+          showToast('二維碼已更新！');
+        }
+      });
+    }
   });
 
   // Listen to single/gradient radio toggle
@@ -1166,12 +1194,18 @@ function initializeApp() {
     lucide.createIcons();
 
     if (cameraScannerInstance) {
-      cameraScannerInstance.stop().then(() => {
+      try {
+        // Only stop if actively scanning to prevent exceptions
+        cameraScannerInstance.stop().then(() => {
+          cameraScannerInstance = null;
+        }).catch(err => {
+          console.error('Error stopping camera:', err);
+          cameraScannerInstance = null;
+        });
+      } catch (e) {
+        console.error('Exception stopping camera:', e);
         cameraScannerInstance = null;
-      }).catch(err => {
-        console.error(err);
-        cameraScannerInstance = null;
-      });
+      }
     }
   }
 
