@@ -2,7 +2,26 @@
    QR Studio Pro (QR 藝境) - Main Application Logic
    ========================================================================== */
 
-document.addEventListener('DOMContentLoaded', () => {
+function initializeApp() {
+  // Fail-safe LocalStorage helper wrapper to prevent security exceptions in sandboxed/Vercel preview environments
+  const safeStorage = {
+    getItem(key) {
+      try {
+        return localStorage.getItem(key);
+      } catch (e) {
+        console.warn('LocalStorage access blocked:', e);
+        return null;
+      }
+    },
+    setItem(key, value) {
+      try {
+        localStorage.setItem(key, value);
+      } catch (e) {
+        console.warn('LocalStorage access blocked:', e);
+      }
+    }
+  };
+
   // --- Global State ---
   const state = {
     activeTab: 'qr-designer',
@@ -405,16 +424,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Theme Toggle logic ---
   function initTheme() {
-    const savedTheme = localStorage.getItem('theme') || 'light';
+    const savedTheme = safeStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
-    localStorage.setItem('theme', savedTheme);
+    safeStorage.setItem('theme', savedTheme);
   }
   
   el.themeToggle.addEventListener('click', () => {
     const currentTheme = document.documentElement.getAttribute('data-theme');
     const newTheme = currentTheme === 'light' ? 'dark' : 'light';
     document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
+    safeStorage.setItem('theme', newTheme);
     showToast(`主題已切換為：${newTheme === 'dark' ? '深色模式' : '淺色模式'}`, 'info');
   });
 
@@ -1042,56 +1061,35 @@ document.addEventListener('DOMContentLoaded', () => {
     elem.addEventListener('change', updatePoetryCard);
   });
 
-  // --- Export/Download Poetry Card as Image (html2canvas) ---
+  // --- Export/Download Poetry Card as Image (dom-to-image) ---
   el.btnDownloadCard.addEventListener('click', () => {
     showToast('正在轉譯高畫質卡片，請稍候...', 'info');
     
     const wrapper = el.cardRenderWrapper;
+    const scale = 2; // upscale factor for high resolution output
     
-    // Temporarily upscale wrapper size for high resolution export
-    const originalStyle = wrapper.getAttribute('style');
-    const originalWidth = wrapper.offsetWidth;
-    const originalHeight = wrapper.offsetHeight;
-    
-    // Scale up for high density output (2x scale)
-    const exportScale = 2.5; 
-    wrapper.style.transform = `scale(${exportScale})`;
-    wrapper.style.transformOrigin = 'top left';
-    
-    const spacer = document.createElement('div');
-    spacer.style.width = `${originalWidth * exportScale}px`;
-    spacer.style.height = `${originalHeight * exportScale}px`;
-    wrapper.parentElement.appendChild(spacer);
-    wrapper.style.position = 'absolute';
-    wrapper.style.left = '-9999px';
-    wrapper.style.top = '-9999px';
-    
-    document.body.appendChild(wrapper);
-
-    // Call html2canvas on upscaled DOM
-    html2canvas(wrapper, {
-      scale: 1, // Already upscaled inside DOM
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: null
-    }).then(canvas => {
-      // Restore DOM state
-      wrapper.removeAttribute('style');
-      wrapper.setAttribute('style', originalStyle || '');
-      const container = document.querySelector('.card-export-wrapper-container');
-      container.innerHTML = '';
-      container.appendChild(wrapper);
-      spacer.remove();
-      
+    // We use the modern, accurate SVG rendering method from dom-to-image which supports vertical-rl writing mode
+    domtoimage.toPng(wrapper, {
+      width: wrapper.clientWidth * scale,
+      height: wrapper.clientHeight * scale,
+      style: {
+        transform: `scale(${scale})`,
+        transformOrigin: 'top left',
+        width: `${wrapper.clientWidth}px`,
+        height: `${wrapper.clientHeight}px`
+      }
+    })
+    .then(dataUrl => {
       // Trigger download
       const link = document.createElement('a');
       link.download = `poetry_card_${Date.now()}.png`;
-      link.href = canvas.toDataURL('image/png');
+      link.href = dataUrl;
       link.click();
       
       showToast('藝術卡片導出成功！');
-      saveToHistoryLog('Poetry Card', canvas.toDataURL('image/png'));
-    }).catch(err => {
+      saveToHistoryLog('Poetry Card', dataUrl);
+    })
+    .catch(err => {
       console.error(err);
       showToast('卡片導出失敗，請重試。', 'error');
     });
@@ -1516,10 +1514,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Load lists from Local Storage
   function loadLocalStorage() {
     try {
-      const storedHistory = localStorage.getItem('qr_studio_history');
+      const storedHistory = safeStorage.getItem('qr_studio_history');
       state.history = storedHistory ? JSON.parse(storedHistory) : [];
 
-      const storedPresets = localStorage.getItem('qr_studio_presets');
+      const storedPresets = safeStorage.getItem('qr_studio_presets');
       state.presets = storedPresets ? JSON.parse(storedPresets) : [...DEFAULT_PRESETS];
     } catch (e) {
       console.error(e);
@@ -1563,7 +1561,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Limit history log to 50 items
     if (state.history.length > 50) state.history.pop();
     
-    localStorage.setItem('qr_studio_history', JSON.stringify(state.history));
+    safeStorage.setItem('qr_studio_history', JSON.stringify(state.history));
   }
 
   // Draw History elements in panel
@@ -1654,7 +1652,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function deleteHistoryItem(id) {
     state.history = state.history.filter(i => i.id !== id);
-    localStorage.setItem('qr_studio_history', JSON.stringify(state.history));
+    safeStorage.setItem('qr_studio_history', JSON.stringify(state.history));
     renderHistoryList();
     showToast('已刪除該筆歷史記錄');
   }
@@ -1662,7 +1660,7 @@ document.addEventListener('DOMContentLoaded', () => {
   el.btnClearHistory.addEventListener('click', () => {
     if (confirm('確定要清空所有的歷史生成記錄嗎？這項動作無法還原。')) {
       state.history = [];
-      localStorage.setItem('qr_studio_history', JSON.stringify(state.history));
+      safeStorage.setItem('qr_studio_history', JSON.stringify(state.history));
       renderHistoryList();
       showToast('歷史記錄已全數清空！');
     }
@@ -1703,7 +1701,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     state.presets.push(newPreset);
-    localStorage.setItem('qr_studio_presets', JSON.stringify(state.presets));
+    safeStorage.setItem('qr_studio_presets', JSON.stringify(state.presets));
     showToast(`風格樣板「${presetName}」儲存成功！`);
   });
 
@@ -1775,7 +1773,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function deletePreset(id) {
     state.presets = state.presets.filter(p => p.id !== id);
-    localStorage.setItem('qr_studio_presets', JSON.stringify(state.presets));
+    safeStorage.setItem('qr_studio_presets', JSON.stringify(state.presets));
     renderPresetsGrid();
     showToast('風格樣板已刪除');
   }
@@ -1885,4 +1883,11 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Create icons
   lucide.createIcons();
-});
+}
+
+// Fail-safe bootloader trigger for modules and delayed script loading
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+  initializeApp();
+}
